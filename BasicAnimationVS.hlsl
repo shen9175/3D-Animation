@@ -16,6 +16,7 @@ struct VertexOut {
 	float3 NormalW	:	NORMAL;
 	float2 Tex		:	TEXCOORD;
 	float4 PosH		:	SV_POSITION;
+	float  Clip		:	SV_ClipDistance0;
 };
 
 VertexOut main( VertexIn vin) {
@@ -41,5 +42,10 @@ VertexOut main( VertexIn vin) {
 
 	//transform texture
 	vout.Tex = mul(float4(vin.Tex, 0.0f, 1.0f), gTexTransform).xy;
+
+	[flatten]
+	if (gClipPlaneEnable) {
+		vout.Clip = dot(float4(vout.PosW, 1.0f), gClipPlane);
+	}
 	return vout;
 }

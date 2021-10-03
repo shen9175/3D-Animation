@@ -1,9 +1,11 @@
-#include <d3d11_2.h>
+#include <d3d11_4.h>
 #include <DirectXMath.h>
 #include <typeinfo>
 #include <fstream>
 #include <string>
 #include <vector>
+#include <deque>
+#include <queue>
 #include <unordered_map>
 #include "Camera.h"
 #include "Animation.h"
@@ -16,7 +18,7 @@
 /*
 bool M3DLoader::LoadM3d(const std::string& filename, 
 	std::vector<PosNormalTex>& vertices,
-	std::vector<unsigned short>& indices,
+	std::vector<unsigned int>& indices,
 	std::vector<Subset>& subsets,
 	std::vector<M3dMaterial>& mats)
 {
@@ -51,7 +53,7 @@ bool M3DLoader::LoadM3d(const std::string& filename,
 
 bool M3DLoader::LoadM3d(const std::string& filename, 
 	std::vector<PosNormalTexTan>& vertices,
-	std::vector<unsigned short>& indices,
+	std::vector<unsigned int>& indices,
 	std::vector<Subset>& subsets,
 	std::vector<M3dMaterial>& mats)
 {
@@ -87,7 +89,7 @@ bool M3DLoader::LoadM3d(const std::string& filename,
 bool M3DLoader::LoadM3d(const std::string& filename, 
 	/*std::vector<PosNormalTexTanAnimation>& vertices,*/
 	void*& vertices,
-	std::vector<unsigned short>& indices,
+	std::vector<unsigned int>& indices,
 	std::vector<Subset>& subsets,
 	std::vector<M3dMaterial>& mats,
 	AnimationData& skinInfo,
@@ -260,7 +262,7 @@ void M3DLoader::ReadSkinnedVertices(std::ifstream& fin, UINT numVertices, void*&
 	}
 }
 
-void M3DLoader::ReadTriangles(std::ifstream& fin, UINT numTriangles, std::vector<unsigned short>& indices)
+void M3DLoader::ReadTriangles(std::ifstream& fin, UINT numTriangles, std::vector<unsigned int>& indices)
 {
 	std::string ignore;
     indices.resize(numTriangles*3);

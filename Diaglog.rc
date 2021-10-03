@@ -1,0 +1,136 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DirectX_Setup DIALOGEX 0, 0, 773, 402
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Display Properties Setup"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,86,372,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,533,371,50,14
+    COMBOBOX        IDC_Adapters,31,73,208,61,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Please Select the Adapter:",IDC_STATIC,32,53,115,14
+    LTEXT           "Graphic API",IDC_STATIC_API,34,21,38,8
+    COMBOBOX        IDC_APIs,31,33,102,64,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_MSAA,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,365,110,197,30
+    LTEXT           "Color Format",IDC_STATIC,31,135,42,8
+    COMBOBOX        IDC_Outputs,31,108,208,40,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Please Select Output Monitor:",IDC_STATIC,33,94,96,8
+    COMBOBOX        IDC_DisplayModes,26,264,191,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Display Modes",IDC_STATIC,28,240,57,14
+    COMBOBOX        IDC_COLOR_FORMATS,29,154,198,60,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "1x",IDC_STATIC,370,142,9,8
+    LTEXT           "2x",IDC_STATIC,430,142,9,8
+    LTEXT           "4x",IDC_STATIC,490,142,9,8
+    LTEXT           "8x",IDC_STATIC,550,142,9,8
+    LTEXT           "Anisotropic Filtering",IDC_STATIC,370,175,64,8
+    CONTROL         "",IDC_AF,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,365,203,197,30
+    LTEXT           "1x",IDC_STATIC,370,232,9,8
+    LTEXT           "2x",IDC_STATIC,415,232,9,8
+    LTEXT           "4x",IDC_STATIC,460,232,9,8
+    LTEXT           "8x",IDC_STATIC,505,232,9,8
+    LTEXT           "16x",IDC_STATIC,550,232,13,8
+    COMBOBOX        IDC_TF,371,50,103,58,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Texture Filtering",IDC_STATIC,374,28,87,12
+    COMBOBOX        IDC_SCREEN,29,204,168,51,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Screen Mode",IDC_STATIC,30,182,47,13
+    CONTROL         "MSAA",IDC_CHECK_MSAA,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,371,89,35,10
+    COMBOBOX        IDC_BUFFER_COUNT,368,275,84,45,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Buffer Count",IDC_STATIC,369,257,51,13
+    CONTROL         "V-Sync",IDC_CHECK_VSYNC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,369,307,63,18
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_DirectX_Setup, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 766
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 395
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_DirectX_Setup AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

@@ -47,6 +47,7 @@ cbuffer cbPerFrame : register(b0) {
 	DirectionalLight gDirLight[3];
 	PointLight gPointLight[10];
 	SpotLight gSpotLight[2];
+	float4 gClipPlane;
 	float3 gEyePosW;
 	float pad;
 	float4 gFogColor;
@@ -70,6 +71,7 @@ cbuffer control	: register(b3) {
 	uint gAlphaClip;
 	uint gFogEnable;
 	uint gReflectionEnable;
+	uint gClipPlaneEnable;
 };
 
 

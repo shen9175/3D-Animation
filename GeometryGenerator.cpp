@@ -1,6 +1,8 @@
-#include <d3d11.h>
+#include <d3d11_4.h>
 #include <DirectXMath.h>
 #include <algorithm>
+#include <queue>
+#include <deque>
 #include <unordered_map>
 #include "GeometryGenerator.h"
 #include "Camera.h"
@@ -59,44 +61,45 @@ XMFLOAT4 Lerp(const XMFLOAT4& a, const XMFLOAT4& b, float t)
 		(1.0f-t)*a.w + t*b.w);
 }
 
-void  GeometryGenerator::CreateLand(const LAND_DESC& desc, void*& vertices, std::vector<unsigned short>& indices, size_t& VertexCount) {
+
+void  GeometryGenerator::CreateLand(const LAND_DESC& desc, void*& vertices, std::vector<unsigned int>& indices, size_t& VertexCount) {
 	MeshData mesh;
 	CreateLand(desc.width, desc.depth, desc.m, desc.n, mesh);
 	VertexCount = mesh.Vertices.size();
 	ConvertMeshData(mesh, vertices, indices);
 }
-void  GeometryGenerator::CreateGrid(const GRID_DESC& desc, void*& vertices, std::vector<unsigned short>& indices, size_t& VertexCount) {
+void  GeometryGenerator::CreateGrid(const GRID_DESC& desc, void*& vertices, std::vector<unsigned int>& indices, size_t& VertexCount) {
 	MeshData mesh;
 	CreateGrid(desc.width, desc.depth, desc.m, desc.n, mesh);
 	VertexCount = mesh.Vertices.size();
 	ConvertMeshData(mesh, vertices, indices);
 }
-void  GeometryGenerator::CreateCylinder(const CYLINDER_DESC& desc, void*& vertices, std::vector<unsigned short>& indices, size_t& VertexCount) {
+void  GeometryGenerator::CreateCylinder(const CYLINDER_DESC& desc, void*& vertices, std::vector<unsigned int>& indices, size_t& VertexCount) {
 	MeshData mesh;
 	CreateCylinder(desc.bottomRadius, desc.topRadius, desc.height, desc.sliceCount, desc.stackCount, mesh);
 	VertexCount = mesh.Vertices.size();
 	ConvertMeshData(mesh, vertices, indices);
 }
-void  GeometryGenerator::CreateGeosphere(const GEOSPHERE_DESC& desc, void*& vertices, std::vector<unsigned short>& indices, size_t& VertexCount) {
+void  GeometryGenerator::CreateGeosphere(const GEOSPHERE_DESC& desc, void*& vertices, std::vector<unsigned int>& indices, size_t& VertexCount) {
 	MeshData mesh;
 	CreateGeosphere(desc.radius, desc.numSubdivisions, mesh);
 	VertexCount = mesh.Vertices.size();
 	ConvertMeshData(mesh, vertices, indices);
 }
-void  GeometryGenerator::CreateSphere(const SPHERE_DESC& desc, void*& vertices, std::vector<unsigned short>& indices, size_t& VertexCount) {
+void  GeometryGenerator::CreateSphere(const SPHERE_DESC& desc, void*& vertices, std::vector<unsigned int>& indices, size_t& VertexCount) {
 	MeshData mesh;
 	CreateSphere(desc.radius, desc.sliceCount, desc.stackCount, mesh);
 	VertexCount = mesh.Vertices.size();
 	ConvertMeshData(mesh, vertices, indices);
 }
-void  GeometryGenerator::CreateBox(const BOX_DESC& desc, void*& vertices, std::vector<unsigned short>& indices, size_t& VertexCount) {
+void  GeometryGenerator::CreateBox(const BOX_DESC& desc, void*& vertices, std::vector<unsigned int>& indices, size_t& VertexCount) {
 	MeshData mesh;
 	CreateBox(desc.width, desc.height, desc.depth, desc.numSubdivisions, mesh);
 	VertexCount = mesh.Vertices.size();
 	ConvertMeshData(mesh, vertices, indices);
 }
 
-void GeometryGenerator::ConvertMeshData(const MeshData& mesh, void*& vertices, std::vector<unsigned short>& indices) {
+void GeometryGenerator::ConvertMeshData(const MeshData& mesh, void*& vertices, std::vector<unsigned int>& indices) {
 	PosNormalTexTan * p = new PosNormalTexTan[mesh.Vertices.size()];
 	for (size_t i = 0; i < mesh.Vertices.size(); ++i) {
 		p[i].Pos = mesh.Vertices[i].Position;
@@ -109,7 +112,7 @@ void GeometryGenerator::ConvertMeshData(const MeshData& mesh, void*& vertices, s
 	}
 	vertices = (void*)p;
 	for (auto item : mesh.Indices) {
-		indices.push_back(static_cast<unsigned short>(item));
+		indices.push_back(static_cast<unsigned int>(item));
 	}
 }
 
@@ -180,11 +183,11 @@ void GeometryGenerator::CreateLand(float width, float depth, unsigned int m, uns
 
 void GeometryGenerator::CreateGrid(float width, float depth, unsigned int m, unsigned int n, MeshData& meshData)
 {
-	unsigned int vertexCount = m*n;
-	unsigned int faceCount = (m - 1)*(n - 1) * 2;
+	unsigned int vertexCount = m * n;
+	unsigned int faceCount = (m - 1) * (n - 1) * 2;
 
-	float halfWidth = 0.5f*width;
-	float halfDepth = 0.5f*depth;
+	float halfWidth = 0.5f * width;
+	float halfDepth = 0.5f * depth;
 
 
 	float dx = width / (n - 1);
@@ -194,14 +197,15 @@ void GeometryGenerator::CreateGrid(float width, float depth, unsigned int m, uns
 	meshData.Vertices.resize(vertexCount);
 	for (unsigned int i = 0; i < m; ++i)
 	{
-		float z = halfDepth - i*dz;
+		float z = halfDepth - i * dz;
 		for (unsigned int j = 0; j < n; ++j)
 		{
-			float x = -halfWidth + j*dx;
-			meshData.Vertices[i*n + j].Position = XMFLOAT3(x, 0.0f, z);
-			meshData.Vertices[i*n + j].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
-			meshData.Vertices[i*n + j].TexC.x = j*du;
-			meshData.Vertices[i*n + j].TexC.y = i*dv;
+			float x = -halfWidth + j * dx;
+			meshData.Vertices[i * n + j].Position = XMFLOAT3(x, 0.0f, z);
+			meshData.Vertices[i * n + j].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			meshData.Vertices[i * n + j].TangentU = XMFLOAT3(1.0f, 0.0f, 0.0f);
+			meshData.Vertices[i * n + j].TexC.x = j * du;
+			meshData.Vertices[i * n + j].TexC.y = i * dv;
 		}
 	}
 

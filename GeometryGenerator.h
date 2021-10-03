@@ -42,12 +42,13 @@ struct BOX_DESC {
 class GeometryGenerator
 {
 public:
-	void CreateLand(const LAND_DESC&, void*& vertices, std::vector<unsigned short>& indices, size_t& VertexCount);
-	void CreateGrid(const GRID_DESC&, void*& vertices, std::vector<unsigned short>& indices, size_t& VertexCount);
-	void CreateCylinder(const CYLINDER_DESC&, void*& vertices, std::vector<unsigned short>& indices, size_t& VertexCount);
-	void CreateGeosphere(const GEOSPHERE_DESC&, void*& vertices, std::vector<unsigned short>& indices, size_t& VertexCount);
-	void CreateSphere(const SPHERE_DESC&, void*& vertices, std::vector<unsigned short>& indices, size_t& VertexCount);
-	void CreateBox(const BOX_DESC&, void*& vertices, std::vector<unsigned short>& indices, size_t& VertexCount);
+	void CreateLand(const LAND_DESC&, void*& vertices, std::vector<unsigned int>& indices, size_t& VertexCount);
+	void CreateGrid(const GRID_DESC&, void*& vertices, std::vector<unsigned int>& indices, size_t& VertexCount);
+	void CreateCylinder(const CYLINDER_DESC&, void*& vertices, std::vector<unsigned int>& indices, size_t& VertexCount);
+	void CreateGeosphere(const GEOSPHERE_DESC&, void*& vertices, std::vector<unsigned int>& indices, size_t& VertexCount);
+	void CreateSphere(const SPHERE_DESC&, void*& vertices, std::vector<unsigned int>& indices, size_t& VertexCount);
+	void CreateBox(const BOX_DESC&, void*& vertices, std::vector<unsigned int>& indices, size_t& VertexCount);
+
 private:
 	struct Vertex
 	{
@@ -62,15 +63,12 @@ private:
 		XMFLOAT3 TangentU;
 		XMFLOAT2 TexC;
 	};
-
-
 	struct MeshData
 	{
 		std::vector<Vertex> Vertices;
 		std::vector<unsigned int> Indices;
 	};
-
-	void ConvertMeshData(const MeshData& mesh, void*& vertices, std::vector<unsigned short>& indices);
+	void ConvertMeshData(const MeshData& mesh, void*& vertices, std::vector<unsigned int>& indices);
 	void CreateLand(float width, float depth, unsigned int m, unsigned int n, MeshData& meshData);
 	void CreateGrid(float width, float depth, unsigned int m, unsigned int n, MeshData& meshData);
 	void CreateCylinder(float bottomRadius, float topRadius, float height, unsigned int sliceCount, unsigned int sttackCount, MeshData & meshData);

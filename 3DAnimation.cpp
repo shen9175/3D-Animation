@@ -1,9 +1,14 @@
-#include <d3d11_2.h>
+#include <d3d11_4.h>
+#include <d2d1_3.h>
+#include <dwrite_3.h>
 #include <DirectXMath.h>
+#include <queue>
+#include <deque>
 #include <unordered_map>
 #include <sstream>
 #include <string>
 #include "GameTimer.h"
+#include "D2DText.h"
 #include "D3DBase.h"
 #include "Camera.h"
 #include "ConstantBuffer.h"
@@ -15,7 +20,8 @@
 #include "Object3D.h"
 #include "3DAnimation.h"
 
-D3DAnimation::D3DAnimation(HINSTANCE hInstance, bool enableMSAA, UINT8 MSAAcount, int width, int height, D3D_DRIVER_TYPE type) : D3DBase(hInstance, enableMSAA, MSAAcount, width, height, type){
+
+D3DAnimation::D3DAnimation(HINSTANCE hInstance, bool enableMSAA, UINT8 MSAAcount, int width, int height, D3D_DRIVER_TYPE type) : D3DBase11(hInstance, enableMSAA, MSAAcount, width, height, type){
 	mMainWndCaption = L"3D Animation Demo";
 	//Cam.SetPosition(10.0f, 14.0f, -24.0f);
 	Cam.SetPosition(0.0f, 4.0f, -15.0f);
@@ -29,23 +35,79 @@ D3DAnimation::~D3DAnimation() {
 }
 
 bool D3DAnimation::Init() {
-	if (!D3DBase::Init()) {
+	if (!D3DBase11::Init()) {
 		return false;
 	}
-	
+
 	mLastMousePos.x = 0;
 	mLastMousePos.y = 0;
 
-	BOX_DESC box = {1.0f, 1.0f, 1.0f, 3};
-	GRID_DESC grid = {20.0f, 30.0f, 60, 40};
-	SPHERE_DESC sphere = {0.5f, 20, 20};
+	BOX_DESC box = { 1.0f, 1.0f, 1.0f, 3 };
+	GRID_DESC grid = { 160.0f, 240.0f, 480, 320 };//{20.0f, 30.0f, 60, 40}
+	SPHERE_DESC sphere = { 0.5f, 20, 20 };
 	CYLINDER_DESC cylinder = { 0.5f, 0.3f, 3.0f, 20, 20 };
+
+	std::vector<PosNormalTexTan> wallvertices = {
+	{ {-3.5f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 2.0f}, {0.0f, 0.0f, 0.0f, 0.0f} },
+	{ {-3.5f, 4.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 0.0f} },
+	{ {-2.5f, 4.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.5f, 0.0f}, {0.0f, 0.0f, 0.0f, 0.0f} },
+	{ {-2.5f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.5f, 2.0f}, {0.0f, 0.0f, 0.0f, 0.0f} },
+
+	{ {2.5f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 2.0f}, {0.0f, 0.0f, 0.0f, 0.0f} },
+	{ {2.5f, 4.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 0.0f} },
+	{ {7.5f, 4.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {2.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 0.0f} },
+	{ {7.5f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {2.0f, 2.0f}, {0.0f, 0.0f, 0.0f, 0.0f} },
+
+	{ {-3.5f, 4.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f} },
+	{ {-3.5f, 6.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 0.0f} },
+	{  {7.5f, 6.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {6.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 0.0f} },
+	{  {7.5f, 4.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {6.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f} }
+	};
+	std::vector<unsigned int> wallindices;
+	wallindices.push_back(0);
+	wallindices.push_back(1);
+	wallindices.push_back(2);
+	wallindices.push_back(0);
+	wallindices.push_back(2);
+	wallindices.push_back(3);
+
+	wallindices.push_back(4);
+	wallindices.push_back(5);
+	wallindices.push_back(6);
+	wallindices.push_back(4);
+	wallindices.push_back(6);
+	wallindices.push_back(7);
+
+	wallindices.push_back(8);
+	wallindices.push_back(9);
+	wallindices.push_back(10);
+	wallindices.push_back(8);
+	wallindices.push_back(10);
+	wallindices.push_back(11);
+
+	std::vector<PosNormalTexTan> mirrorvertices;
+	mirrorvertices.push_back({ {-2.5f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}});
+	mirrorvertices.push_back({ {-2.5f, 4.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 0.0f}});
+	mirrorvertices.push_back({ {2.5f, 4.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 0.0f}});
+	mirrorvertices.push_back({ {2.5f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f},  {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}});
+	std::vector<unsigned int> mirrorindices;
+	mirrorindices.push_back(0);
+	mirrorindices.push_back(1);
+	mirrorindices.push_back(2);
+	mirrorindices.push_back(0);
+	mirrorindices.push_back(2);
+	mirrorindices.push_back(3);
 
 	Material mGridMat;
 	Material mBoxMat;
 	Material mCylinderMat;
 	Material mSphereMat;
+	Material mRoomMat;
+	Material mMirrorMat;
 
+	mMirrorMat.Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	mMirrorMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.5f);
+	mMirrorMat.Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 16.0f);
 
 
 	mGridMat.Ambient  = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
@@ -64,21 +126,35 @@ bool D3DAnimation::Init() {
 	mBoxMat.Diffuse  = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	mBoxMat.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 16.0f);
 
+
+	mRoomMat.Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	mRoomMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mRoomMat.Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 16.0f);
+
 	fogenable = true;
-	
+	renderWire = false;
 	XMFLOAT4X4 I;
 	XMFLOAT4X4 rotation;
 	XMStoreFloat4x4(&rotation, XMMatrixRotationY(XM_PI));
 	XMStoreFloat4x4(&I, XMMatrixIdentity());
 	//instanceName;translation;rotation;scale;modelName;modelFilename;texturePath;VShaderName;PShaderName;LayoutName; vertexTypeName;
+	
 	std::vector<ObjectInstance_M3dModelList_DESC> objlist = {
-		{"player", {0.0f, 0.0f, -100.0f}, rotation, {0.05f, 0.05f, -0.05f}, "soldier", ".\\Models\\soldier.m3d", ".\\Textures\\","BasicAnimationVS","FixFunctionLightPS","PosNormalTexTanSkinned","PosNormalTexTanAnimation"}
+		{"player", {0.0f, 0.0f, -8.0f}, rotation, {0.05f, 0.05f, -0.05f}, {1.0f, 1.0f, 1.0f}, "soldier", ".\\Models\\soldier.m3d", ".\\Textures\\","BasicAnimationVS","FixFunctionLightPS","PosNormalTexTanSkinned","PosNormalTexTanAnimation", {false,{0.0f, 0.0f, 0.0f, 0.0f}}}
 	};
 	std::vector<ObjectInstance_BOXLIST_DESC> boxlist = {
-		{ "podium",{0.0f, 0.5f, 0.0f}, I, {3.0f,1.0f,3.0f}, "box", mBoxMat, ".\\Textures\\", "stone.dds", "stones_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan",box} 
+		{ "podium",{0.0f, 0.5f, 0.0f}, I, {3.0f,1.0f,3.0f}, {1.0f, 1.0f, 1.0f}, "box", mBoxMat, ".\\Textures\\", "stone.dds", "stones_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan",box} 
 	};
+	
 	std::vector<ObjectInstance_GRIDLIST_DESC> gridlist = {
-		{ "land", {0.0f, 0.0f,0.0f}, I, {1.0f,1.0f,1.0f}, "grid", mGridMat, ".\\Textures\\", "floor.dds", "floor_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan",grid}
+		{ "land", {0.0f, 0.0f,0.0f}, I, {1.0f,1.0f,1.0f}, {48.0f, 64.0f, 1.0f}, "grid", mGridMat, ".\\Textures\\", "floor.dds", "floor_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan",grid, {false,{0.0f, 0.0f, 0.0f, 0.0f}}}
+	};
+	
+	std::vector<ObjectInstance_Custom_DESC> customlist = {
+		{"wallinstance1", {-2.0f, 0.0f, 15.0f}, I, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, "wall", mRoomMat, ".\\Textures\\","brick01.dds","bricks_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan", wallvertices, wallindices},
+		{"wallinstance2", {2.0f, 0.0f, -15.0f}, rotation, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, "wall", mRoomMat, ".\\Textures\\","brick01.dds","bricks_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan", wallvertices, wallindices},
+		{"mirrorinstance1", {-2.0f, 0.0f, 15.0f}, I, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, "mirror", mMirrorMat, ".\\Textures\\","ice.dds","bricks_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan",mirrorvertices, mirrorindices, {true,{0.0f, 0.0f, 1.0f, 0.0f}}},
+		{"mirrorinstance2", {2.0f, 0.0f, -15.0f}, rotation, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, "mirror", mMirrorMat, ".\\Textures\\","ice.dds","bricks_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan",mirrorvertices, mirrorindices, {true,{0.0f, 0.0f, 1.0f, 0.0f}}}
 	};
 	mDirLights[0].Ambient  = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	mDirLights[0].Diffuse  = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
@@ -119,12 +195,12 @@ bool D3DAnimation::Init() {
 	std::vector<ObjectInstance_CYLINDERLIST_DESC> cylinderlist;
 	for(int i = 0; i < 5; ++i)
 	{
-		ObjectInstance_CYLINDERLIST_DESC item1 = { "pillar" + std::to_string(i * 2 + 1), {-5.0f, 1.5f, -10.0f + i*5.0f}, I, {1.0f,1.0f,1.0f}, "cylinder", mCylinderMat, ".\\Textures\\", "bricks.dds", "bricks_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan", cylinder};
-		ObjectInstance_CYLINDERLIST_DESC item2 = { "pillar" + std::to_string(i * 2 + 2), {+5.0f, 1.5f, -10.0f + i*5.0f}, I, {1.0f,1.0f,1.0f}, "cylinder", mCylinderMat, ".\\Textures\\", "bricks.dds", "bricks_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan",cylinder};
+		ObjectInstance_CYLINDERLIST_DESC item1 = { "pillar" + std::to_string(i * 2 + 1), {-5.0f, 1.5f, -10.0f + i*5.0f}, I, {1.0f,1.0f,1.0f}, {1.0f, 1.0f, 1.0f}, "cylinder", mCylinderMat, ".\\Textures\\", "bricks.dds", "bricks_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan", cylinder};
+		ObjectInstance_CYLINDERLIST_DESC item2 = { "pillar" + std::to_string(i * 2 + 2), {+5.0f, 1.5f, -10.0f + i*5.0f}, I, {1.0f,1.0f,1.0f}, {1.0f, 1.0f, 1.0f}, "cylinder", mCylinderMat, ".\\Textures\\", "bricks.dds", "bricks_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan",cylinder};
 		cylinderlist.push_back(item1);
 		cylinderlist.push_back(item2);
-		ObjectInstance_SPHERELIST_DESC item3 = { "ball" + std::to_string(i * 2 + 1), {-5.0f, 3.5f, -10.0f + i*5.0f}, I, {1.0f,1.0f,1.0f}, "sphere", mCylinderMat, ".\\Textures\\", "stone.dds", "stones_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan",sphere};
-		ObjectInstance_SPHERELIST_DESC item4 = { "ball" + std::to_string(i * 2 + 2), {+5.0f, 3.5f, -10.0f + i*5.0f}, I, {1.0f,1.0f,1.0f}, "sphere", mCylinderMat, ".\\Textures\\", "stone.dds", "stones_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan",sphere};
+		ObjectInstance_SPHERELIST_DESC item3 = { "ball" + std::to_string(i * 2 + 1), {-5.0f, 3.5f, -10.0f + i*5.0f}, I, {1.0f,1.0f,1.0f}, {1.0f, 1.0f, 1.0f}, "sphere", mCylinderMat, ".\\Textures\\", "stone.dds", "stones_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan",sphere};
+		ObjectInstance_SPHERELIST_DESC item4 = { "ball" + std::to_string(i * 2 + 2), {+5.0f, 3.5f, -10.0f + i*5.0f}, I, {1.0f,1.0f,1.0f}, {1.0f, 1.0f, 1.0f}, "sphere", mCylinderMat, ".\\Textures\\", "stone.dds", "stones_nmap.dds", "BasicVS","FixFunctionLightPS","PosNormTexTan","PosNormalTexTan",sphere};
 		spherelist.push_back(item3);
 		spherelist.push_back(item4);
 
@@ -143,18 +219,25 @@ bool D3DAnimation::Init() {
 		mPointLights[i * 2 + 1].Range = 4.0f;
 		pointLightsw[i * 2 + 1] = true;
 	}
+	
+	//list = new Object3DList(this);
+	
 	list = new Object3DList(this,objlist);
 	list->AddBoxist(boxlist);
 	list->AddGridList(gridlist);
 	list->AddCylinderList(cylinderlist);
 	list->AddSphereList(spherelist);
+	
+	list->AddCustomList(customlist);
+	
+	//list->AddM3dModelList(objlist);
 	list->Init();
 	Cam.SetLens(0.25f * XM_PI, getAspectRatio(), 1.0f, 1000.0f);
 	return true;
 }
 
 void D3DAnimation::OnResize() {
-	D3DBase::OnResize();
+	D3DBase11::OnResize();
 	Cam.SetLens(0.25f * XM_PI, getAspectRatio(), 1.0f, 1000.0f);
 }
 
@@ -200,39 +283,37 @@ void D3DAnimation::Update(float dt) {
 
 	}
 	*/
-	Object3DInstance* player = list->getPlayer("player");	
-		if (GetAsyncKeyState(VK_UP) & 0x8000 ) {
+	Object3DInstance* player = list->getPlayer("player");
+	if (player) {
+		if (GetAsyncKeyState(VK_UP) & 0x8000) {
 			XMMATRIX world = XMLoadFloat4x4(&(list->getPlayer("player")->mWorld));
 			XMMATRIX translation;
-			XMFLOAT4X4 offset = { 1.0f, 0.0f, 0.0f, 0.0f,0.0f, 1.0f, 0.0f, 0.0f,0.0f, 0.0f,1.0f, 0.0f,0.0f, 0.0f, -45.0f * dt, 1.0f};
+			XMFLOAT4X4 offset = { 1.0f, 0.0f, 0.0f, 0.0f,0.0f, 1.0f, 0.0f, 0.0f,0.0f, 0.0f,1.0f, 0.0f,0.0f, 0.0f, -45.0f * dt, 1.0f };
 			translation = XMLoadFloat4x4(&offset);
 			XMStoreFloat4x4(&list->getPlayer("player")->mWorld, translation * world);
 			//list->getPlayer("player")->mWorld._43 -= 2.5f * dt;
 			list->Update(dt);
-		} else if (GetAsyncKeyState(VK_DOWN) & 0x8000 ) {
+		} else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {
 			XMMATRIX world = XMLoadFloat4x4(&(list->getPlayer("player")->mWorld));
 			XMMATRIX translation;
-			XMFLOAT4X4 offset = { 1.0f, 0.0f, 0.0f, 0.0f,0.0f, 1.0f, 0.0f, 0.0f,0.0f, 0.0f,1.0f, 0.0f,0.0f, 0.0f, 45.0f * dt, 1.0f};
+			XMFLOAT4X4 offset = { 1.0f, 0.0f, 0.0f, 0.0f,0.0f, 1.0f, 0.0f, 0.0f,0.0f, 0.0f,1.0f, 0.0f,0.0f, 0.0f, 45.0f * dt, 1.0f };
 			translation = XMLoadFloat4x4(&offset);
 			XMStoreFloat4x4(&list->getPlayer("player")->mWorld, translation * world);
 			list->Update(-dt);
-		} else if (GetAsyncKeyState(VK_LEFT) & 0x8000 ) {
+		} else if (GetAsyncKeyState(VK_LEFT) & 0x8000) {
 			XMMATRIX world = XMLoadFloat4x4(&(list->getPlayer("player")->mWorld));
 			world = XMMatrixRotationY(0.004f * XM_PI) * world;
 			XMStoreFloat4x4(&(list->getPlayer("player")->mWorld), world);
 			list->Update(dt);
-		} else if (GetAsyncKeyState(VK_RIGHT) & 0x8000 ) {
+		} else if (GetAsyncKeyState(VK_RIGHT) & 0x8000) {
 			XMMATRIX world = XMLoadFloat4x4(&(list->getPlayer("player")->mWorld));
 			world = XMMatrixRotationY(-0.004f * XM_PI) * world;
 			XMStoreFloat4x4(&(list->getPlayer("player")->mWorld), world);
 			list->Update(dt);
-	} else {
-		list->Update(0);
+		} else {
+			list->Update(0);
+		}
 	}
-		XMStoreFloat3(&player->mUP, XMVector3Transform(XMLoadFloat3(&player->mUP), XMLoadFloat4x4(&player->mWorld)));
-		XMStoreFloat3(&player->mForward, XMVector3Transform(XMLoadFloat3(&player->mForward), XMLoadFloat4x4(&player->mWorld)));
-		XMStoreFloat3(&player->mRight, XMVector3Transform(XMLoadFloat3(&player->mRight), XMLoadFloat4x4(&player->mWorld)));	
-
 		Cam.UpdateViewMatrix();
 
 
@@ -247,6 +328,7 @@ void D3DAnimation::Update(float dt) {
 
 void  D3DAnimation::Draw() {
 	list->FrameDraw();
+
 }
 
 void D3DAnimation::OnMouseDown(WPARAM btnState, int x, int y) {
@@ -383,6 +465,22 @@ void D3DAnimation::OnKeyDown(WPARAM wParam) {
 		} else {
 			fogenable = true;
 		}
+		break;
+	case '7':
+		if (renderWire) {
+			renderWire = false;
+		} else {
+			renderWire = true;
+		}
+		break;
+	case VK_PRIOR:
+		// page up -> chose higher resolution
+		D3DBase11::changeResolution(true);
+		break;
+
+	case VK_NEXT:
+		// page down -> chose lower resolution
+		D3DBase11::changeResolution(false);
 		break;
 	default:
 		break;

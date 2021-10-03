@@ -22,7 +22,7 @@ public:
 	float GetFarZ() const { return mFarZ; }
 	float GetAspect() const { return mAspect; }
 	float GetFovY() const { return mFovY; }
-	float GetFovX() const { return 2.0f * atan(0.5f * GetNearWindowWidth() / mNearZ); }
+	float GetFovX() const { return static_cast<float>(2.0f * atan(0.5f * GetNearWindowWidth() / mNearZ)); }
 
 	float GetNearWindowWidth() const { return mAspect * mNearWindowHeight; }
 	float GetNearWindowHeight() const { return mNearWindowHeight; }

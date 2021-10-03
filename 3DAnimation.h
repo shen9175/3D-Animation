@@ -1,7 +1,7 @@
 #ifndef D3DANIMATION_H
 #define D3DANIMATION_H
 
-class D3DAnimation : public D3DBase {
+class D3DAnimation : public D3DBase11 {
 	friend Object3DList;
 public:
 	D3DAnimation(HINSTANCE hInstance, bool enableMSAA, UINT8 MSAAcount, int width, int height, D3D_DRIVER_TYPE type);
@@ -24,6 +24,7 @@ private:
 	bool pointLightsw[10];
 	bool SpotLightsw[2];
 	bool fogenable;
+	bool renderWire;
 	Object3DList* list;
 	POINT mLastMousePos;
 };
